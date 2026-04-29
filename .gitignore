@@ -7,4 +7,13 @@ build/
 dist/
 target/
 .DS_Store
+Thumbs.dbvenv/
+__pycache__/
+*.pyc
+.env
+node_modules/
+build/
+dist/
+target/
+.DS_Store
 Thumbs.db
