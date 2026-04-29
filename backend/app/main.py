@@ -1,8 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import analyze
+from app.routers import analyze, audit
 from dotenv import load_dotenv
-import os
 
 load_dotenv('../../.env')
 
@@ -21,6 +20,7 @@ app.add_middleware(
 )
 
 app.include_router(analyze.router)
+app.include_router(audit.router)
 
 @app.get("/")
 async def root():

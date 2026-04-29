@@ -40,36 +40,14 @@ Analyze this contract for vulnerabilities.
 
 Return ONLY valid JSON, no other text, no markdown, no backticks:
 {{
-    "risk_score": <0-100>,
-    "risk_level": "<CRITICAL|HIGH|MEDIUM|LOW|SAFE>",
-    "summary": "<one sentence>",
+    "risk_score": <number>,
     "vulnerabilities": [
         {{
-            "id": "vuln-001",
-            "type": "<type>",
-            "severity": "<CRITICAL|HIGH|MEDIUM|LOW>",
-            "line": <number or null>,
             "title": "<short title>",
+            "severity": "<CRITICAL|HIGH|MEDIUM|LOW>",
             "description": "<what is wrong>",
-            "impact": "<what can happen>",
+            "line": <number>,
             "fix": "<exact fix>",
-            "score_contribution": <points>
-        }}
-    ],
-    "score_breakdown": {{
-        "reasoning": "<why this score>",
-        "positives": ["<good things>"],
-        "critical_count": <n>,
-        "high_count": <n>,
-        "medium_count": <n>,
-        "low_count": <n>
-    }},
-    "improvement_priority": [
-        {{
-            "order": 1,
-            "fix": "<what to fix>",
-            "effort": "<5 min|30 min|2 hours>",
-            "severity": "<CRITICAL|HIGH|MEDIUM>"
         }}
     ],
     "exploit_story": "<how a hacker exploits this step by step>"
@@ -101,14 +79,10 @@ try:
     result = json.loads(raw)
     print(f"✅ Analysis complete!")
     print(f"Risk Score : {result['risk_score']}/100")
-    print(f"Risk Level : {result['risk_level']}")
-    print(f"Summary    : {result['summary']}")
     print(f"Vulns Found: {len(result['vulnerabilities'])}")
     print()
     for v in result['vulnerabilities']:
         print(f"  [{v['severity']}] {v['title']}")
-    print()
-    print(f"Reasoning  : {result['score_breakdown']['reasoning']}")
     print()
     print(f"Exploit    : {result['exploit_story'][:150]}...")
 except json.JSONDecodeError as e:

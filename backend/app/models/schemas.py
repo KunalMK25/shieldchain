@@ -6,15 +6,11 @@ class AnalyzeRequest(BaseModel):
     contract_name: Optional[str] = "Unknown Contract"
 
 class Vulnerability(BaseModel):
-    id: str
-    type: str
-    severity: str
-    line: Optional[int] = None
     title: str
+    severity: str
     description: str
-    impact: str
+    line: int
     fix: str
-    score_contribution: int
 
 class ScoreBreakdown(BaseModel):
     reasoning: str
@@ -32,9 +28,31 @@ class ImprovementPriority(BaseModel):
 
 class AnalyzeResponse(BaseModel):
     risk_score: int
-    risk_level: str
-    summary: str
     vulnerabilities: List[Vulnerability]
-    score_breakdown: ScoreBreakdown
-    improvement_priority: List[ImprovementPriority]
     exploit_story: str
+
+
+class AnalyzeWithPdfResponse(BaseModel):
+    analysis: AnalyzeResponse
+    pdf_url: str
+    cid: str
+
+
+class RegisterAuditRequest(BaseModel):
+    contract_code: str
+    analysis: AnalyzeResponse
+    report_text: str
+    ipfs_cid: Optional[str] = None
+    auditor: str = "local-dev"
+
+
+class AuditRecordResponse(BaseModel):
+    audit_id: str
+    contract_hash: str
+    report_hash: str
+    risk_score: int
+    risk_level: str
+    ipfs_cid: Optional[str] = None
+    auditor: str
+    created_at: str
+    source: str

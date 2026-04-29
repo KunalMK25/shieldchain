@@ -1,6 +1,8 @@
 from fastapi import APIRouter, HTTPException
-from app.models.schemas import AnalyzeRequest, AnalyzeResponse
+from app.models.schemas import AnalyzeRequest, AnalyzeWithPdfResponse
 from app.services.analyzer import analyze_contract
+from app.services.report_generator import generate_audit_report
+from app.services.ipfs_uploader import upload_pdf_to_ipfs
 import json
 
 router = APIRouter(
@@ -8,7 +10,7 @@ router = APIRouter(
     tags=["Analysis"]
 )
 
-@router.post("/", response_model=AnalyzeResponse)
+@router.post("/", response_model=AnalyzeWithPdfResponse)
 async def analyze(request: AnalyzeRequest):
     if not request.contract_code.strip():
         raise HTTPException(
@@ -23,8 +25,14 @@ async def analyze(request: AnalyzeRequest):
         )
 
     try:
-        result = analyze_contract(request.contract_code)
-        return result
+        analysis = analyze_contract(request.contract_code)
+        pdf_path = generate_audit_report(analysis)
+        ipfs = upload_pdf_to_ipfs(pdf_path)
+        return {
+            "analysis": analysis,
+            "pdf_url": ipfs["url"],
+            "cid": ipfs["cid"],
+        }
     except json.JSONDecodeError:
         raise HTTPException(
             status_code=500,
