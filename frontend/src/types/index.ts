@@ -18,10 +18,13 @@ export interface ScoreBreakdown {
 }
 
 export interface ImprovementPriority {
-  order:    number;
-  fix:      string;
-  effort:   string;
-  severity: string;
+  order:        number;
+  fix:          string;
+  effort:       string;
+  severity:     string;
+  before_code?: string;
+  after_code?:  string;
+  explanation?: string;
 }
 
 export interface AnalysisResult {

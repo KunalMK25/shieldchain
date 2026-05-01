@@ -37,8 +37,8 @@ const FALLBACK_ANALYSIS: ScanResponse = {
       low_count: 0
     },
     improvement_priority: [
-      { order: 1, fix: "Fix reentrancy by updating state first", effort: "Low", severity: "HIGH" },
-      { order: 2, fix: "Add checked arithmetic", effort: "Low", severity: "MEDIUM" }
+      { order: 1, fix: "Fix reentrancy by updating state before external calls", effort: "Low", severity: "HIGH", before_code: "(bool success, ) = msg.sender.call{value: amount}(\"\");\nbalances[msg.sender] = 0;", after_code: "balances[msg.sender] = 0;\n(bool success, ) = msg.sender.call{value: amount}(\"\");", explanation: "Always update state before making external calls to prevent reentrancy." },
+      { order: 2, fix: "Add checked arithmetic to prevent overflow", effort: "Low", severity: "MEDIUM", before_code: "let total = balance + amount;", after_code: "let total = balance.checked_add(amount)\n  .unwrap_or_else(|| panic!(\"overflow\"));", explanation: "Use checked_add() so the contract panics safely instead of silently overflowing." }
     ]
   },
   pdf_url: "#",
@@ -403,12 +403,15 @@ impl HelloContract {
                   </div>
                 </div>
 
-                {/* Vulnerability Cards */}
+                {/* Vulnerability Cards — Agent 1: Vulnerability Hunter */}
                 {state.scanResult.analysis.vulnerabilities.length > 0 && (
                   <div className="space-y-3">
-                    <h3 className="text-xl font-semibold text-white">
-                      Vulnerabilities ({state.scanResult.analysis.vulnerabilities.length})
-                    </h3>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-xl font-semibold text-white">
+                        Vulnerabilities ({state.scanResult.analysis.vulnerabilities.length})
+                      </h3>
+                      <span className="text-xs bg-teal/20 text-teal border border-teal/30 px-2 py-0.5 rounded-full">Agent 1 · Vulnerability Hunter</span>
+                    </div>
                     {state.scanResult.analysis.vulnerabilities.map((vuln, index) => (
                       <div
                         key={index}
@@ -525,42 +528,71 @@ impl HelloContract {
                   </div>
                 )}
 
-                {/* Improvement Priority */}
+                {/* Improvement Priority — Agent 3: Remediation Advisor */}
                 {state.scanResult.analysis.improvement_priority && state.scanResult.analysis.improvement_priority.length > 0 && (
                   <div className="bg-navy/50 border border-teal/20 rounded-lg p-6">
-                    <h3 className="text-xl font-semibold text-white mb-4">Improvement Priority</h3>
-                    <div className="space-y-3">
+                    <div className="flex items-center gap-2 mb-4">
+                      <h3 className="text-xl font-semibold text-white">Code Fixes</h3>
+                      <span className="text-xs bg-purple/20 text-purple border border-purple/30 px-2 py-0.5 rounded-full">Agent 3 · Remediation Advisor</span>
+                    </div>
+                    <div className="space-y-4">
                       {state.scanResult.analysis.improvement_priority.map((item) => (
-                        <div key={item.order} className="flex items-start gap-4 p-3 bg-navy/80 rounded border border-teal/10">
-                          <div className="flex-shrink-0 w-8 h-8 bg-teal/20 rounded-full flex items-center justify-center">
-                            <span className="text-teal font-bold text-sm">{item.order}</span>
-                          </div>
-                          <div className="flex-1">
-                            <p className="text-white text-sm mb-2">{item.fix}</p>
-                            <div className="flex items-center gap-3 text-xs">
-                              <span className="text-gray-400">
-                                Effort: <span className="text-white font-medium">{item.effort}</span>
-                              </span>
-                              <span className="text-gray-400">•</span>
-                              <span className="text-gray-400">
-                                Severity: <span className={`font-medium ${
-                                  item.severity === 'CRITICAL' ? 'text-critical' :
-                                  item.severity === 'HIGH' ? 'text-high' :
-                                  item.severity === 'MEDIUM' ? 'text-yellow-500' :
-                                  'text-safe'
-                                }`}>{item.severity}</span>
-                              </span>
+                        <div key={item.order} className="bg-navy/80 rounded-lg border border-teal/10 overflow-hidden">
+                          {/* Header */}
+                          <div className="flex items-start gap-4 p-4">
+                            <div className="flex-shrink-0 w-8 h-8 bg-teal/20 rounded-full flex items-center justify-center">
+                              <span className="text-teal font-bold text-sm">{item.order}</span>
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-white text-sm font-medium mb-1">{item.fix}</p>
+                              {item.explanation && (
+                                <p className="text-gray-400 text-xs mb-2">{item.explanation}</p>
+                              )}
+                              <div className="flex items-center gap-3 text-xs">
+                                <span className="text-gray-400">
+                                  Effort: <span className="text-white font-medium">{item.effort}</span>
+                                </span>
+                                <span className="text-gray-400">•</span>
+                                <span className="text-gray-400">
+                                  Severity: <span className={`font-medium ${
+                                    item.severity === 'CRITICAL' ? 'text-critical' :
+                                    item.severity === 'HIGH' ? 'text-high' :
+                                    item.severity === 'MEDIUM' ? 'text-yellow-500' :
+                                    'text-safe'
+                                  }`}>{item.severity}</span>
+                                </span>
+                              </div>
                             </div>
                           </div>
+                          {/* Before / After code */}
+                          {(item.before_code || item.after_code) && (
+                            <div className="grid grid-cols-2 border-t border-teal/10">
+                              {item.before_code && (
+                                <div className="p-3 border-r border-teal/10">
+                                  <p className="text-xs text-critical font-semibold mb-1">❌ Before</p>
+                                  <pre className="text-xs text-gray-300 font-mono whitespace-pre-wrap break-all">{item.before_code}</pre>
+                                </div>
+                              )}
+                              {item.after_code && (
+                                <div className="p-3">
+                                  <p className="text-xs text-safe font-semibold mb-1">✅ After</p>
+                                  <pre className="text-xs text-gray-300 font-mono whitespace-pre-wrap break-all">{item.after_code}</pre>
+                                </div>
+                              )}
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
                   </div>
                 )}
 
-                {/* Exploit Narrative */}
+                {/* Exploit Narrative — Agent 2: Exploit Narrator */}
                 <div className="bg-navy/50 border border-teal/20 rounded-lg p-6">
-                  <h3 className="text-xl font-semibold text-white mb-4">Exploit Narrative</h3>
+                  <div className="flex items-center gap-2 mb-4">
+                    <h3 className="text-xl font-semibold text-white">Exploit Narrative</h3>
+                    <span className="text-xs bg-high/20 text-high border border-high/30 px-2 py-0.5 rounded-full">Agent 2 · Exploit Narrator</span>
+                  </div>
                   <p className="text-gray-300 text-sm leading-relaxed">
                     {state.scanResult.analysis.exploit_story}
                   </p>
