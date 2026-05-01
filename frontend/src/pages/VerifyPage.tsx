@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Search, CheckCircle, AlertTriangle, Loader2, ExternalLink, Clock, Shield, User, FileText, Database } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import Navbar from '../components/Navbar';
@@ -38,14 +38,13 @@ export default function VerifyPage() {
     const hash = params.get('hash');
     if (hash) {
       setState(prev => ({ ...prev, query: hash }));
-      // Trigger verification after a short delay to ensure state is updated
       setTimeout(() => {
         handleVerifyWithHash(hash);
       }, 100);
     }
-  }, []);
+  }, [handleVerifyWithHash]);
 
-  const handleVerifyWithHash = async (hash: string) => {
+  const handleVerifyWithHash = useCallback(async (hash: string) => {
     if (!hash.trim()) return;
 
     setState(prev => ({
@@ -86,7 +85,8 @@ export default function VerifyPage() {
         error: error instanceof Error ? error.message : 'Unknown error occurred'
       }));
     }
-  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleVerify = async () => {
     await handleVerifyWithHash(state.query);
