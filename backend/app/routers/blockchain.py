@@ -39,7 +39,7 @@ async def anchor(request: AnchorRequest):
     
     # Check if Soroban CLI is available
     import shutil
-    has_soroban_cli = shutil.which("soroban") is not None
+    has_soroban_cli = shutil.which("soroban") is not None or shutil.which("stellar") is not None
     
     # Try Soroban anchoring only if CLI is available
     tx_hash = None
@@ -129,12 +129,12 @@ async def anchor(request: AnchorRequest):
 async def verify(contract_hash: str):
     """
     Verify audit records from blockchain or local store.
-    
+
     1. Try Soroban query (source="stellar")
     2. On failure, check local store (source="local-store")
     3. If neither found, raise 404
     """
-    # Try Soroban first
+    # Try Soroban first — catch ALL exceptions so missing env vars don't 500
     try:
         audit_data = get_audit_from_soroban(contract_hash)
         return VerifyResponse(
@@ -146,26 +146,29 @@ async def verify(contract_hash: str):
             auditor=audit_data["auditor"],
             source="stellar"
         )
-    except RuntimeError:
-        # Fallback to local store
+    except Exception:
+        pass  # Fall through to local store
+
+    # Fallback to local store
+    try:
         history = get_history(contract_hash)
-        if not history:
-            raise HTTPException(
-                status_code=404,
-                detail="Audit record not found"
-            )
-        
-        # Return most recent record
-        most_recent = sorted(history, key=lambda x: x["created_at"], reverse=True)[0]
-        return VerifyResponse(
-            contract_hash=most_recent["contract_hash"],
-            report_hash=most_recent["report_hash"],
-            risk_score=most_recent["risk_score"],
-            ipfs_cid=most_recent.get("ipfs_cid", ""),
-            timestamp=most_recent["created_at"],
-            auditor=most_recent["auditor"],
-            source="local-store"
-        )
+    except Exception as e:
+        logger.error(f"Failed to read local audit store: {e}")
+        history = []
+
+    if not history:
+        raise HTTPException(status_code=404, detail="Audit record not found")
+
+    most_recent = sorted(history, key=lambda x: x["created_at"], reverse=True)[0]
+    return VerifyResponse(
+        contract_hash=most_recent["contract_hash"],
+        report_hash=most_recent["report_hash"],
+        risk_score=most_recent["risk_score"],
+        ipfs_cid=most_recent.get("ipfs_cid", ""),
+        timestamp=most_recent["created_at"],
+        auditor=most_recent["auditor"],
+        source="local-store"
+    )
 
 
 @router.get("/history/{contract_hash}", response_model=List[HistoryRecord])
