@@ -1,5 +1,6 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import Response
 from app.routers import analyze, report, blockchain, dynamic_analyze, sentinel
 from app.routers import audit
 from app.models.schemas import StatusResponse
@@ -19,8 +20,9 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",
         "https://shieldchain.vercel.app",
-        "https://*.vercel.app",  # All Vercel preview deployments
+        "https://shieldchain-roan.vercel.app",
     ],
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
