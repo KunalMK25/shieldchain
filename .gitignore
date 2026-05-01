@@ -1,19 +1,48 @@
+# Python
 venv/
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+.hypothesis/
+
+# Environment — never commit secrets
 .env
+
+# Node
 node_modules/
 build/
 dist/
+
+# Rust / Cargo
 target/
-.DS_Store
-Thumbs.dbvenv/
-__pycache__/
-*.pyc
-.env
-node_modules/
-build/
-dist/
-target/
+
+# OS
 .DS_Store
 Thumbs.db
+
+# Generated PDFs — too large, regenerated at runtime
+backend/reports/
+
+# Audit logs — runtime generated
+backend/logs/
+
+# Kiro IDE files
+.kiro/
+.vscode/
+
+# Demo/summary markdown files (optional — remove if you want them)
+DEMO_READY.md
+INTEGRATION_COMPLETE.md
+READY_FOR_DEMO.md
+TASK_*.md
+backend/TASK*.md
+
+# Test snapshots
+contracts/**/test_snapshots/
+
+# pytest cache
+.pytest_cache/
+pytest.ini
