@@ -1,13 +1,13 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import Response
 from app.routers import analyze, report, blockchain, dynamic_analyze, sentinel
 from app.routers import audit
 from app.models.schemas import StatusResponse
 from dotenv import load_dotenv
 import os
 
-load_dotenv('D:/shieldchain/.env')
+# Load .env if present (local dev). On Render, env vars are injected directly.
+load_dotenv()
 
 app = FastAPI(
     title="ShieldChain API",
@@ -15,6 +15,7 @@ app = FastAPI(
     version="1.0.0"
 )
 
+# Open CORS — required for Vercel frontend to reach Render backend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
