@@ -32,18 +32,6 @@ export default function VerifyPage() {
     error: null
   });
 
-  // Auto-verify if hash is provided in URL
-  React.useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const hash = params.get('hash');
-    if (hash) {
-      setState(prev => ({ ...prev, query: hash }));
-      setTimeout(() => {
-        handleVerifyWithHash(hash);
-      }, 100);
-    }
-  }, [handleVerifyWithHash]);
-
   const handleVerifyWithHash = useCallback(async (hash: string) => {
     if (!hash.trim()) return;
 
@@ -87,6 +75,18 @@ export default function VerifyPage() {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Auto-verify if hash is provided in URL
+  React.useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const hash = params.get('hash');
+    if (hash) {
+      setState(prev => ({ ...prev, query: hash }));
+      setTimeout(() => {
+        handleVerifyWithHash(hash);
+      }, 100);
+    }
+  }, [handleVerifyWithHash]);
 
   const handleVerify = async () => {
     await handleVerifyWithHash(state.query);
