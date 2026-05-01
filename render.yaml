@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: shieldchain-api
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: USE_LANGCHAIN_AGENTS
+        value: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: PINATA_API_KEY
+        sync: false
+      - key: PINATA_SECRET_KEY
+        sync: false
+      - key: STELLAR_SECRET_KEY
+        sync: false
+      - key: STELLAR_PUBLIC_KEY
+        sync: false
+      - key: STELLAR_RPC_URL
+        value: https://soroban-testnet.stellar.org
+      - key: HORIZON_URL
+        value: https://horizon-testnet.stellar.org
