@@ -1,6 +1,5 @@
 # ShieldChain
 
-**Altaria v1.0 Hackathon — AI × Blockchain Track — DSCE Bangalore**
 
 ---
 
@@ -477,7 +476,6 @@ SOFTWARE.
 
 ## Acknowledgments
 
-Built for the **Altaria v1.0 Hackathon** — AI × Blockchain Track at DSCE Bangalore.
 
 **Technologies:**
 - [Stellar](https://stellar.org/) — Blockchain platform
