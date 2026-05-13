@@ -122,7 +122,7 @@ cargo build --target wasm32-unknown-unknown --release
 
 # Deploy to Stellar Testnet
 stellar contract deploy \
-  --wasm target/wasm32-unknown-unknown/release/hello_world.wasm \
+  --wasm target/wasm32-unknown-unknown/release/audit_registry.wasm \
   --source your-key-name \
   --network testnet
 
